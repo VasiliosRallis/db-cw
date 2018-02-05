@@ -1,0 +1,37 @@
+
+-- Q1 returns (name,father,mother)
+SELECT person_child.name, person_child.father, person_child.mother
+FROM person AS person_child
+JOIN person AS person_father
+ON person_child.father = person_father.name
+JOIN person AS person_mother
+ON person_mother.name = person_child.mother 
+WHERE person_child.dod < person_father.dod AND person_child.dod < person_mother.dod;
+
+-- Q2 returns (name)
+
+;
+
+-- Q3 returns (name)
+
+;
+
+-- Q4 returns (house,name,accession)
+
+;
+
+-- Q5 returns (first_name,popularity)
+
+;
+
+-- Q6 returns (house,seventeenth,eighteenth,nineteenth,twentieth)
+
+; 
+
+-- Q7 returns (father,child,born)
+
+;
+
+-- Q8 returns (monarch,prime_minister)
+
+;
