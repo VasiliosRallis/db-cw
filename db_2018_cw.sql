@@ -70,36 +70,20 @@ WHERE person.gender = 'M'
 ORDER BY person.name, fathers.born;
 
 -- Q8 returns (monarch,prime_minister)
-/*
-SELECT DISTINCT  myMonarch.name AS monarch,
-       (CASE WHEN (myPrimeMinister.entry BETWEEN myMonarch.accession AND myMonarch.deccession)
-               OR (myPrimeMinister.exit BETWEEN myMonarch.accession AND myMonarch.deccession)
-              THEN myPrimeMinister.name END) AS prime_minister
-FROM (SELECT prime_minister.name, prime_minister.entry,
-      MIN(CASE WHEN next_prime_minister.entry > prime_minister.entry
-            THEN next_prime_minister.entry END) AS exit
-      FROM prime_minister, prime_minister AS next_prime_minister
-      GROUP BY prime_minister.name, prime_minister.entry) AS myPrimeMinister,
-     (SELECT monarch.name, monarch.accession,
-      MIN(CASE WHEN next_monarch.accession > monarch.accession 
-            THEN next_monarch.accession END) AS deccession
-      FROM monarch, monarch AS next_monarch
-      GROUP BY monarch.name, monarch.accession) AS myMonarch
-WHERE (CASE WHEN myPrimeMinister.entry BETWEEN myMonarch.accession AND myMonarch.deccession THEN myPrimeMinister.name END) IS NOT NULL
-ORDER BY myMonarch.name, prime_minister;
-*/
 SELECT DISTINCT myMonarch.name AS monarch,
                 CASE WHEN (myPrimeMinister.entry BETWEEN myMonarch.accession AND myMonarch.deccession)
                        OR (myMonarch.accession BETWEEN myPrimeMinister.entry AND myPrimeMinister.exit)
                      THEN myPrimeMinister.name END AS prime_minister
 FROM (SELECT name, entry,
-      LEAD(entry, 1, '2100-01-01') OVER(ORDER BY entry) AS exit
+      LEAD(entry, 1, '9999-01-01') OVER(ORDER BY entry) AS exit
       FROM prime_minister) AS myPrimeMinister,
      (SELECT name, accession,
-      LEAD(accession, 1, '2100-01-01') OVER(ORDER BY accession) AS deccession
+      LEAD(accession, 1, '9999-01-01') OVER(ORDER BY accession) AS deccession
       FROM monarch
       WHERE monarch.house IS NOT NULL) AS myMonarch
 WHERE CASE WHEN (myPrimeMinister.entry BETWEEN myMonarch.accession AND myMonarch.deccession)
              OR (myMonarch.accession  BETWEEN myPrimeMinister.entry AND myPrimeMinister.exit)
             THEN myPrimeMinister.name END IS NOT NULL
 ORDER BY monarch, prime_minister;
+
+
