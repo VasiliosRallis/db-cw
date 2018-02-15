@@ -30,10 +30,9 @@ ORDER BY monarch.name;
 -- Q4 returns (house,name,accession)
 SELECT house, name, accession
 FROM monarch
-WHERE  accession < ALL(SELECT monarch_successor.accession
+WHERE  accession <= ALL(SELECT monarch_successor.accession
                     FROM monarch AS monarch_successor
-                    WHERE (monarch.house = monarch_successor.house) IS TRUE
-                    AND monarch_successor.name <> monarch.name)
+                    WHERE (monarch.house = monarch_successor.house) IS TRUE)
 AND monarch.house IS NOT NULL
 ORDER BY accession;
 
