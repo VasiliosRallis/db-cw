@@ -7,7 +7,7 @@ JOIN person AS person_mother
 ON person_mother.name = person_child.mother 
 WHERE person_child.dod < person_father.dod AND person_child.dod < person_mother.dod
 ORDER BY name;*/
-
+/*
 SELECT name
 FROM person
 WHERE EXISTS (SELECT *
@@ -47,7 +47,7 @@ WHERE  accession < ALL(SELECT monarch_successor.accession
                     AND monarch_successor.name <> monarch.name)
 AND monarch.house IS NOT NULL
 ORDER BY accession;
-
+*/
 
 -- Q5 returns (first_name,popularity)
 SELECT first_names.first_name,
@@ -56,8 +56,10 @@ FROM (SELECT SUBSTRING(name FROM 1 FOR (CASE WHEN POSITION(' ' IN name) = 0
                                   THEN LENGTH(name)
                                   ELSE POSITION(' ' IN name) - 1 END)) AS first_name,  name FROM person) AS first_names
 GROUP BY first_names.first_name
+HAVING COUNT(first_names.name) > 1
 ORDER BY popularity DESC, first_names.first_name;
 -- Q6 returns (house,seventeenth,eighteenth,nineteenth,twentieth)
+/*
 SELECT house,
        COUNT(CASE WHEN accession BETWEEN DATE('1600-01-01') AND DATE('1699-12-31') THEN accession END) AS seventeenth,
        COUNT(CASE WHEN accession BETWEEN DATE('1700-01-01') AND DATE('1799-12-31') THEN accession END) AS eighteenth,
@@ -68,15 +70,17 @@ WHERE house IS NOT NULL
 GROUP BY house;
 
 -- Q7 returns (father,child,born)
-SELECT father,
-       name as child,
-       RANK() OVER
-              (PARTITION BY father ORDER BY dob ASC) AS born
-FROM person
-WHERE father IS NOT NULL
-ORDER BY father, born;
+SELECT person.name AS father, fathers.child, fathers.born
+FROM person LEFT JOIN (SELECT father, name as child,
+                       RANK() OVER
+                            (PARTITION BY father ORDER BY dob ASC) AS born 
+                       FROM person
+                       WHERE father IS NOT NULL) AS fathers ON person.name = fathers.father
+WHERE person.gender = 'M'
+ORDER BY fathers.father, fathers.born;
 
 -- Q8 returns (monarch,prime_minister)
+
 SELECT DISTINCT  myMonarch.name AS monarch,
        (CASE WHEN (myPrimeMinister.entry BETWEEN myMonarch.accession AND myMonarch.deccession)
                OR (myPrimeMinister.exit BETWEEN myMonarch.accession AND myMonarch.deccession)
@@ -93,3 +97,4 @@ FROM (SELECT prime_minister.name, prime_minister.entry,
       GROUP BY monarch.name, monarch.accession) AS myMonarch
 WHERE (CASE WHEN myPrimeMinister.entry BETWEEN myMonarch.accession AND myMonarch.deccession THEN myPrimeMinister.name END) IS NOT NULL
 ORDER BY myMonarch.name, prime_minister;
+*/
