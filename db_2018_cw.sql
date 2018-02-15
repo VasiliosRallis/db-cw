@@ -27,6 +27,7 @@ WHERE EXISTS (SELECT *
               AND monarch_successor.accession > monarch.accession)
 AND monarch.house IS NOT NULL
 ORDER BY monarch.name;
+
 -- Q4 returns (house,name,accession)
 SELECT house, name, accession
 FROM monarch
@@ -71,8 +72,8 @@ ORDER BY person.name, fathers.born;
 
 -- Q8 returns (monarch,prime_minister)
 SELECT DISTINCT myMonarch.name AS monarch,
-                CASE WHEN (myPrimeMinister.entry BETWEEN myMonarch.accession AND myMonarch.deccession)
-                       OR (myMonarch.accession BETWEEN myPrimeMinister.entry AND myPrimeMinister.exit)
+                CASE WHEN (myPrimeMinister.entry BETWEEN DATE(myMonarch.accession) AND DATE(myMonarch.deccession))
+                       OR (myMonarch.accession BETWEEN DATE(myPrimeMinister.entry) AND DATE(myPrimeMinister.exit))
                      THEN myPrimeMinister.name END AS prime_minister
 FROM (SELECT name, entry,
       LEAD(entry, 1, '9999-01-01') OVER(ORDER BY entry) AS exit
@@ -85,5 +86,3 @@ WHERE CASE WHEN (myPrimeMinister.entry BETWEEN myMonarch.accession AND myMonarch
              OR (myMonarch.accession  BETWEEN myPrimeMinister.entry AND myPrimeMinister.exit)
             THEN myPrimeMinister.name END IS NOT NULL
 ORDER BY monarch, prime_minister;
-
-
