@@ -1,12 +1,4 @@
 -- Q1 returns (name,father,mother)
-/*SELECT person_child.name, person_child.father, person_child.mother
-FROM person AS person_child
-JOIN person AS person_father
-ON person_child.father = person_father.name
-JOIN person AS person_mother
-ON person_mother.name = person_child.mother 
-WHERE person_child.dod < person_father.dod AND person_child.dod < person_mother.dod
-ORDER BY name;*/
 /*
 SELECT name
 FROM person
@@ -18,7 +10,6 @@ WHERE EXISTS (SELECT *
               AND person.dod < person_father.dod)
 ORDER BY name;
 
-                                      
 -- Q2 return (name)
 SELECT name
 FROM monarch
@@ -37,7 +28,6 @@ WHERE EXISTS (SELECT *
               AND monarch_successor.accession > monarch.accession)
 AND monarch.house IS NOT NULL;
 
-
 -- Q4 returns (house,name,accession)
 SELECT house, name, accession
 FROM monarch
@@ -47,19 +37,20 @@ WHERE  accession < ALL(SELECT monarch_successor.accession
                     AND monarch_successor.name <> monarch.name)
 AND monarch.house IS NOT NULL
 ORDER BY accession;
-*/
 
 -- Q5 returns (first_name,popularity)
 SELECT first_names.first_name,
        COUNT(first_names.name) AS popularity
 FROM (SELECT SUBSTRING(name FROM 1 FOR (CASE WHEN POSITION(' ' IN name) = 0
                                   THEN LENGTH(name)
-                                  ELSE POSITION(' ' IN name) - 1 END)) AS first_name,  name FROM person) AS first_names
+                                  ELSE POSITION(' ' IN name) - 1 END)) AS first_name,
+			          name
+                                  FROM person) AS first_names
 GROUP BY first_names.first_name
 HAVING COUNT(first_names.name) > 1
 ORDER BY popularity DESC, first_names.first_name;
+
 -- Q6 returns (house,seventeenth,eighteenth,nineteenth,twentieth)
-/*
 SELECT house,
        COUNT(CASE WHEN accession BETWEEN DATE('1600-01-01') AND DATE('1699-12-31') THEN accession END) AS seventeenth,
        COUNT(CASE WHEN accession BETWEEN DATE('1700-01-01') AND DATE('1799-12-31') THEN accession END) AS eighteenth,
@@ -80,7 +71,6 @@ WHERE person.gender = 'M'
 ORDER BY fathers.father, fathers.born;
 
 -- Q8 returns (monarch,prime_minister)
-
 SELECT DISTINCT  myMonarch.name AS monarch,
        (CASE WHEN (myPrimeMinister.entry BETWEEN myMonarch.accession AND myMonarch.deccession)
                OR (myPrimeMinister.exit BETWEEN myMonarch.accession AND myMonarch.deccession)
@@ -98,3 +88,17 @@ FROM (SELECT prime_minister.name, prime_minister.entry,
 WHERE (CASE WHEN myPrimeMinister.entry BETWEEN myMonarch.accession AND myMonarch.deccession THEN myPrimeMinister.name END) IS NOT NULL
 ORDER BY myMonarch.name, prime_minister;
 */
+SELECT DISTINCT myMonarch.name AS monarch,
+                CASE WHEN (myPrimeMinister.entry BETWEEN myMonarch.accession AND myMonarch.deccession)
+                       OR (myPrimeMinister.exit BETWEEN myMonarch.accession AND myMonarch.deccession)
+                     THEN myPrimeMinister.name END AS prime_minister
+FROM (SELECT name, entry,
+      LEAD(entry, 1) OVER(ORDER BY entry) AS exit
+      FROM prime_minister) AS myPrimeMinister,
+     (SELECT name, accession,
+      LEAD(accession, 1) OVER(ORDER BY accession) AS deccession
+      FROM monarch) AS myMonarch
+WHERE CASE WHEN (myPrimeMinister.entry BETWEEN myMonarch.accession AND myMonarch.deccession)
+             OR (myPrimeMinister.exit BETWEEN myMonarch.accession AND myMonarch.deccession)
+            THEN myPrimeMinister.name END IS NOT NULL
+ORDER BY monarch, prime_minister;
