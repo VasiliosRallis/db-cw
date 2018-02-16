@@ -74,6 +74,10 @@ SELECT DISTINCT myMonarch.name AS monarch,
          (CASE WHEN (myPrimeMinister.entry BETWEEN myMonarch.accession AND myMonarch.deccession)
                OR (myMonarch.accession BETWEEN myPrimeMinister.entry AND myPrimeMinister.exit)
                THEN myPrimeMinister.name END) AS prime_minister
+
+-- Create two tables. The first table will list all the prime ministers with their name, entry and exit
+-- The second will list all the monarchs with their name, accession and deccession. If the prime_minister/monarch is still in power
+-- Set a date in the future as the exit/deccession
 FROM (SELECT prime_minister.name, prime_minister.entry,
        COALESCE(MIN(CASE WHEN next_prime_minister.entry > prime_minister.entry
                     THEN next_prime_minister.entry END), '9999-12-31') AS exit
